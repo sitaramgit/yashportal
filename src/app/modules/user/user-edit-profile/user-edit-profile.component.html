@@ -1,0 +1,82 @@
+<div class="se-pre-con" *ngIf="loder"></div>
+<div class="page-header">
+    <h3 class="page-title"> Edit </h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/user">User</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Profile Edit</li>
+      </ol>
+    </nav>
+  </div>
+
+
+
+  <div class="row">
+    <div class="col-md-1">
+      
+    </div>
+    <div class="col-md-10 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Profile Edit Form</h4> 
+          <form #updFrm="ngForm" (ngSubmit)="updFrm.valid && updateUser(updFrm.value)" class="forms-sample">
+            <div class="form-group row">
+              <label  class="col-sm-3 col-form-label">First Name</label>
+              <div class="col-sm-9">
+                <input type="text" name="firstname"  [(ngModel)]="fields.firstname" required class="form-control" placeholder="First Name">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label  class="col-sm-3 col-form-label">Last Name</label>
+              <div class="col-sm-9">
+                <input type="text"  name="lastname"  [(ngModel)]="fields.lastname" required class="form-control"   placeholder="Last Name">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label   class="col-sm-3 col-form-label">Mobile</label>
+              <div class="col-sm-9">
+                <input type="number" min="0"  name="mobile"  [(ngModel)]="fields.mobile" required  class="form-control"  placeholder="Mobile number">
+              </div>
+            </div>
+
+            <div class="form-group row">
+                <label  class="col-sm-3 col-form-label">City</label>
+                <div class="col-sm-9">
+                  <input type="text" name="mailingcity"  [(ngModel)]="fields.mailingcity" required class="form-control"   placeholder="City">
+                </div>
+              </div>
+
+              <div class="form-group row">
+                <label  class="col-sm-3 col-form-label">State</label>
+                <div class="col-sm-9">
+                  <input type="text" name="mailingstate"  [(ngModel)]="fields.mailingstate" required class="form-control"   placeholder="State">
+                </div>
+              </div>
+
+              <div class="form-group row">
+                <label  class="col-sm-3 col-form-label">Country</label>
+                <div class="col-sm-9">
+                  <input type="text" name="mailingcountry"  [(ngModel)]="fields.mailingcountry" required class="form-control"   placeholder="Country">
+                </div>
+              </div>
+            <p *ngIf="!updFrm.valid" class="text-danger">Please All Fields</p>
+            <input type="hidden" ngModel name="module" [ngModel]="'user'">
+            <input type="hidden" ngModel name="view" [ngModel]="'update'">
+            <input type="hidden" ngModel name="record" [ngModel]="fields.record">
+            <button type="submit" [disabled]="!updFrm.valid" class="btn btn-gradient-danger mr-2">Submit</button> 
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-1">
+      
+    </div>
+
+     
+    
+     
+    
+    
+     
+     
+  </div>

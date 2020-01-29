@@ -1,0 +1,113 @@
+<div class="se-pre-con" *ngIf="loder"></div>
+<div class="page-header">
+    <h3 class="page-title"> Profile </h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="">User</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Profile</li>
+      </ol>
+    </nav>
+  </div>
+
+
+
+
+  <div class="row" *ngIf="fields!=null">
+    <div class="col-lg-6 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">  
+          <div class="profile-userpic">
+            <img src="assets/images/faces/user-icon.jpg" class="img-responsive" alt="">
+        </div>
+        <!-- END SIDEBAR USERPIC -->
+        <!-- SIDEBAR USER TITLE -->
+        <div class="profile-usertitle">
+            <div class="profile-usertitle-name">
+                {{fields.firstname +" "+ fields.lastname}}
+            </div>
+            <div class="profile-usertitle-job">
+                {{fields.email}}
+            </div>
+
+            <div class="profile-usertitle-job">
+                {{fields.mobile}}
+            </div>
+        </div>
+        <!-- END SIDEBAR USER TITLE -->
+        <!-- SIDEBAR BUTTONS -->
+        <div class="profile-userbuttons">
+            <a routerLink="/user/profile-edit"  class="btn btn-success btn-sm">Edit Profile</a>
+            <button type="button" class="btn btn-danger btn-sm">Change Password</button>
+        </div>
+
+
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+            
+            <table class="table">
+                 
+                <tbody>
+                  <tr>
+                    <th>Contact Id</th>
+                    <td> {{fields.email}}</td> 
+                  </tr>
+                  <tr> 
+                    <th>Assigned To</th>
+                    <td>{{fields.assigned_user_id}}</td>
+                  </tr>
+                  
+
+                  <tr>
+                    <th>Created Time</th>
+                    <td> {{fields.createdtime}}</td> 
+                  </tr>
+
+                  <tr> 
+                    <th>Assigned To</th>
+                    <td>{{fields.assigned_user_id}}</td>
+                  </tr>
+                  <tr>
+                    <th>Support Start Date</th>
+                    <td> {{fields.support_start_date}}</td> 
+                  </tr>
+                  <tr> 
+                    <th>Support End Date</th>
+                    <td>{{fields.support_end_date}}</td>
+                  </tr>
+                  <tr>
+                    <th>City</th>
+                    <td> {{fields.mailingcity}}</td> 
+                  </tr>
+                  <tr> 
+                    <th>State</th>
+                    <td>{{fields.mailingstate}}</td>
+                  </tr>
+                  <tr>
+                    <th>Country</th>
+                    <td> {{fields.mailingcountry}}</td> 
+                  </tr>
+                </tbody>
+              </table>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+
+
+
+
+
+
+
+
+ 
+    
+ 

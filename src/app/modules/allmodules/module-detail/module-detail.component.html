@@ -1,0 +1,28 @@
+<div class="se-pre-con" *ngIf="loder"></div>
+<div class="page-header">
+    <h3 class="page-title"> {{moduleName}} </h3>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/"> {{moduleName}} </a></li>
+        <li class="breadcrumb-item active" aria-current="page">Details</li>
+      </ol>
+    </nav>
+  </div>
+
+
+
+  <div class="col-lg-12 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h3>{{moduleName}} Detail</h3> 
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-md-6" *ngFor="let item of listVals">
+                <b>{{item.fieldlabel}}</b>
+                <p>{{item.fieldvalue}}</p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>

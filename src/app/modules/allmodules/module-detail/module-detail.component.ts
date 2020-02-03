@@ -16,6 +16,8 @@ export class ModuleDetailComponent implements OnInit {
 
   public lables:any;
   public listVals:any = null;
+  public contents:any = null;
+  public cmnt:any = "";
   ngOnInit() {  
     this.actroute.paramMap.subscribe((params: ParamMap) => {
       this.moduleName  = params.get('modulename');
@@ -30,10 +32,25 @@ export class ModuleDetailComponent implements OnInit {
     this.allSer.getModuleDetail(modul,id).subscribe(
       data=>{
         this.loder = false; 
-          this.listVals = data[0][this.moduleName];
+          // this.listVals = data[0][this.moduleName];
+          this.contents = data.html;
+
           console.log( this.listVals); 
         
         
+      },
+      err => console.log(err)
+    );
+  }
+
+  addCmnt(){
+    console.log(this.cmnt)
+    this.loder = true;
+    this.allSer.createComment(this.moduleName,this.record,this.cmnt).subscribe(
+      data=>{ 
+          console.log(data); 
+          this.cmnt = ""; 
+          this.moduleDetail(this.moduleName,this.record);
       },
       err => console.log(err)
     );

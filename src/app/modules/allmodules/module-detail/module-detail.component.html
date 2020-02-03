@@ -14,10 +14,22 @@
   <div class="col-lg-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <h3>{{moduleName}} Detail</h3> 
-        <br>
-        <br>
-        <div class="row">
+        <!-- <h3>{{moduleName}} Detail</h3>  -->
+        <!-- <br>
+        <br> -->
+        <div [innerHTML]="contents"></div>
+          <br>
+        <div class="form-group row no-padding">
+          <label class="col-sm-2 control-label no-padding-right">
+            Add Comment
+          </label>
+          <div class="col-sm-10 dvtCellInfo" align="left" style="background-color:none;">
+            <textarea name="comments" [(ngModel)]="cmnt" style="width:100%;"></textarea><br><br>
+            <input [disabled]="cmnt ==''" class="btn  btn-success" title="Submit" (click)="addCmnt()"  name="submit" value="Submit"  type="button" >
+          </div>
+        </div>
+
+        <div class="row" *ngIf="listVals!=null">
             <div class="col-md-6" *ngFor="let item of listVals">
                 <b>{{item.fieldlabel}}</b>
                 <p>{{item.fieldvalue}}</p>

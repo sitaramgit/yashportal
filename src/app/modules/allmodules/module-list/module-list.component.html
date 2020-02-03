@@ -13,7 +13,9 @@
     <div class="card">
       <div class="card-body sample">
         <h4 class="card-title">{{moduleName}} List</h4> 
-       <h1 *ngIf="listVals==null">No Records Avaible</h1>
+       <h1 *ngIf="contents==null">No Records Avaible</h1>
+
+       <div [innerHTML]="contents"></div>
         <table *ngIf="listVals!=null" class="table table-bordered">
           <thead>
             <tr>

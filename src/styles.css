@@ -18,3 +18,16 @@
 .logo_text{
     color: #f30446;
 }
+
+ .dvtCellInfo {
+    background-color: #f7f7f7;
+    font-size: 14px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    position: relative;
+}
+
+.widget-header {  
+    background-repeat: repeat-x;
+    color: #669fc7; 
+}

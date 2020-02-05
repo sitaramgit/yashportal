@@ -25,4 +25,18 @@ export class GetModulesService {
     let params={module:name,view:"Comments", comments : cmt, id:id, sessionid:this.usrSer.currentUserDetails().sessionid, customerid:this.usrSer.currentUserDetails().id};
     return this._http.post(this.usrSer.serverUrl,params);
   }
+
+  getComboValues():Observable<any>{
+    let params={module:"HelpDesk",view:"combo_values",sessionid:this.usrSer.currentUserDetails().sessionid, customerid:this.usrSer.currentUserDetails().id};
+    return this._http.post(this.usrSer.serverUrl,params);
+  }
+  createTicket(frm):Observable<any>{
+    frm.id = this.usrSer.currentUserDetails().id;
+    frm.sessionid = this.usrSer.currentUserDetails().sessionid;
+    frm.parent_id = this.usrSer.currentUserDetails().id;
+    frm.module = "HelpDesk"; 
+    frm.view = "create"; 
+    // let params={module:name,view:"Comments", comments : cmt, id:id, sessionid:this.usrSer.currentUserDetails().sessionid, id:this.usrSer.currentUserDetails().id};
+    return this._http.post(this.usrSer.serverUrl,frm);
+  }
 }

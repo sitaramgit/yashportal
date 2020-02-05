@@ -10,8 +10,12 @@ import { Router } from '@angular/router';
 export class UserService {
 
   constructor(private http:HttpClient, private share:SharedService,private route:Router) { }
+  //live
+  public serverUrl = "http://app.theprintshop.co.za/AngularAPI.php";
+ 
 
-  public serverUrl = "http://173.255.216.217/yash71/AngularAPI.php";
+  //clone
+  //  public serverUrl = "http://173.255.216.217/yash71/AngularAPI.php";
   public decoded = window.atob("encoded");
   loginUser(data):Observable<any>{
     let params={module:"user",view:"check", email : data.email, password : data.password };

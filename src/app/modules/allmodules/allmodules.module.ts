@@ -7,10 +7,11 @@ import { ModuleListComponent } from './module-list/module-list.component';
 import { ModuleDetailComponent } from './module-detail/module-detail.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { TicketCreateComponent } from './ticket-create/ticket-create.component';
 
 
 @NgModule({
-  declarations: [AllmodulesComponent, ModuleListComponent, ModuleDetailComponent],
+  declarations: [AllmodulesComponent, ModuleListComponent, ModuleDetailComponent, TicketCreateComponent],
   imports: [
     CommonModule,
     HttpClientModule,

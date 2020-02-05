@@ -44,7 +44,10 @@ export class ModuleListComponent implements OnInit {
         
         
       },
-      err => console.log(err)
+      err => {
+        this.loder = false;
+        console.log(err)
+      }
     );
   }
 

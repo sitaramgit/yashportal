@@ -19,7 +19,7 @@
         <br> -->
         <div [innerHTML]="contents"></div>
           <br>
-        <div class="form-group row no-padding">
+        <div class="form-group row no-padding" *ngIf="moduleName == 'HelpDesk'">
           <label class="col-sm-2 control-label no-padding-right">
             Add Comment
           </label>
@@ -27,6 +27,39 @@
             <textarea name="comments" [(ngModel)]="cmnt" style="width:100%;"></textarea><br><br>
             <input [disabled]="cmnt ==''" class="btn  btn-success" title="Submit" (click)="addCmnt()"  name="submit" value="Submit"  type="button" >
           </div>
+        </div>
+
+        <div class="form-group" *ngIf="moduleName == 'HelpDesk'">
+           
+          <div class="widget-header">
+            <h5 class="widget-title">Attachments</h5>
+          </div>
+
+          <div class="row" *ngFor="let img of files;">
+            <div class="col-md-4">
+              <img  style="    width: 150px;
+              margin-bottom: 10px;" src="{{img.filepath}}" alt="">
+            </div>
+            <div class="col-md-3">
+              {{img.label}}
+            </div>
+            <div class="col-md-3">
+              {{img.createdtime}}
+            </div>
+            <div class="col-md-2"> 
+            </div>
+          </div>
+          
+          
+          <input type="file" #img   (change)="upld.value = img.value; onSelectedFile($event);" name="img[]" class="file-upload-default">
+          <div class="input-group col-xs-12">
+            <input type="text"  #upld   class="form-control file-upload-info" disabled="" placeholder="Attach File :">
+            <span class="input-group-append">
+              <button (click)="img.click()" class="file-upload-browse btn btn-gradient-primary" type="button">Attach</button>
+            </span> 
+          </div>
+          <br>
+          <button (click)="onSubmit(); upld.value=null;" class="file-upload-browse btn btn-gradient-success" type="button">Upload</button>
         </div>
 
         <div class="row" *ngIf="listVals!=null">

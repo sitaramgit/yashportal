@@ -40,7 +40,7 @@ export class ModuleListComponent implements OnInit {
         // }
         this.contents = data.html;
 
-        setTimeout(()=>{this.navigateUser();},900)
+        setTimeout(()=>{this.navigateUser(data);},900);
         
         
       },
@@ -56,13 +56,14 @@ export class ModuleListComponent implements OnInit {
     this.route.navigate(['/all-modules/module-detail',this.moduleName,item.record]);
   }
 
-  navigateUser(){
+  navigateUser(data){
     var thisins = this;
     document.querySelectorAll('.userView').forEach( function ( item ) {
       var uitem = item;
       item.addEventListener('click', function(event) {
               console.log("item-clicked myEnt");
               console.log(item.classList);
+              thisins.route.navigate(['/user']);
 
        }); 
     });
@@ -79,7 +80,159 @@ export class ModuleListComponent implements OnInit {
 
        }); 
     });
-    console.log(90);
+
+    document.querySelectorAll('.downLoadImg').forEach( function ( item ) {
+      var ditem = item;
+      item.addEventListener('click', function(event) {
+               console.log(this.src) ;
+               var path:any = this.src;
+
+               var link = document.createElement('a');
+                link.href = path;
+                link.target="_self";
+                link.download = 'Download.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+       }); 
+    });
+
+    document.querySelectorAll('.faqdetailView').forEach( function ( item ) {
+      var ditem = item;
+      item.addEventListener('click', function(event) {
+           
+             
+              let id = ditem.classList[2];
+              let record = id.replace("id_", "");
+              console.log(record); 
+
+             let faq = data.view[2];
+
+            let faqdetail = faq.filter(itm=>{
+              return itm.id == record;
+            });
+            let faqdt = faqdetail[0];
+
+            // table-responsive
+            let htmls = `<div class='row'>
+            <div class='col-md-4'><p><b>FAQ No</b></p> ${faqdt.faqno} </div>
+            <div class='col-md-4'><p><b>Category</b></p> ${faqdt.category}</div>
+            <div class='col-md-4'><p><b>Created At</b></p> ${faqdt.faqcreatedtime}</div>
+            <div class='col-md-12'><br></div>
+            <div class='col-md-12'><p><b>Question</b></p> ${faqdt.question}</div>
+            <div class='col-md-12'><p><b>Answer</b></p> ${faqdt.answer}</div>
+            </div>`;
+            console.log(faqdetail[0].faqno);
+
+            document.querySelector(".table-responsive").innerHTML = htmls;
+           
+
+       }); 
+    });
+
+
+    document.querySelectorAll('.category_index').forEach( function ( item ) {
+      var ditem = item;
+      item.addEventListener('click', function(event) {
+           
+             
+              let id = ditem.classList[2];
+              let indx = id.replace("id_", "");
+             let catg =  data.view[0][parseInt(indx)];
+
+             
+             document.querySelector(".widget_titles").innerHTML =`<h5><b> Category: ${catg}</b></h5>`;
+             console.log(catg)
+
+             let faq = data.view[2];
+
+             let htmls = '<table width="100%" border="0" cellspacing="1" cellpadding="3" class="lvt table table-striped table-bordered table-hover"><tbody>'; 
+            let arr = []
+             let faqdetail = faq.filter(itm=>{
+              if(itm.category == catg){
+                arr.push(item);
+                htmls +=`<tr>
+                <td>
+                  <img src="assets/faq.png" valign="absmiddle">&nbsp;
+                  <a class="cursor  faqdetailView id_${itm.id}">${itm.question}</a>
+                </td>
+                   </tr>
+                   
+                   <tr>
+							      <td class="small">${itm.answer}</td>
+			    		   	</tr>`;
+              }
+              return true;
+            });
+            if(arr.length == 0){
+              htmls += "<tr><th>No Data Availble</th><td></td></tr>";
+            }
+            htmls += "</tbody></table>";
+            let faqdt = faqdetail;
+            console.log(faqdt);
+ 
+            
+            
+            document.querySelector(".table-responsive").innerHTML = htmls;
+            setTimeout(()=>{thisins.navigateUser(data);},900);
+           
+
+       }); 
+    });
+
+
+    document.querySelectorAll('.productfaqDetail').forEach( function ( item ) {
+      var ditem = item;
+      item.addEventListener('click', function(event) {
+           
+             
+              let id = ditem.classList[2];
+              let record = id.replace("id_", "");  
+
+             let faq = data.view[2];
+
+             let htmls = '<table width="100%" border="0" cellspacing="1" cellpadding="3" class="lvt table table-striped table-bordered table-hover"><tbody>'; 
+            let arr =[];
+             let faqdetail = faq.filter(itm=>{
+              if(itm.product_id == record){
+                arr.push(itm);
+                htmls +=`<tr>
+                <td>
+                  <img src="assets/faq.png" valign="absmiddle">&nbsp;
+                  <a class="cursor  faqdetailView id_${itm.id}">${itm.question}</a>
+                </td>
+                   </tr>
+                   
+                   <tr>
+							      <td class="small">${itm.answer}</td>
+			    		   	</tr>`;
+              }
+              return true;
+            });
+
+            if(arr.length == 0){
+              htmls += "<tr><th>No Data Availble</th><td></td></tr>";
+            }
+
+            htmls += "</tbody></table>";
+            let faqdt = faqdetail;
+            console.log(faqdt);
+ 
+            document.querySelector(".widget_titles").innerHTML =`<h5><b> Product Related</b></h5>`;
+            
+            document.querySelector(".table-responsive").innerHTML = htmls;
+            setTimeout(()=>{thisins.navigateUser(data);},900);
+           
+
+       }); 
+    });
+
+
+    
+
+
+  
   }
 
 }

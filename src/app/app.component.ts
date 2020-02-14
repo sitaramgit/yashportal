@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UserService } from './common-services/user.service';
+import { Router, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,7 @@ import { UserService } from './common-services/user.service';
 })
 export class AppComponent {
   title = 'yash';
-  constructor(public usrSer:UserService){}
+  constructor(public usrSer:UserService,private router: Router){}
 
   public user:boolean;
   ngOnInit(){
@@ -18,6 +19,17 @@ export class AppComponent {
         this.user = logged; 
       }
     );
-    window.scrollTo(0, 0);
+
+    this.router.events.subscribe(val => {
+   
+      
+      if (val instanceof NavigationEnd) {
+        console.log(val.url);
+        window.scrollTo(0, 0);
+        
+      }
+  });
+
+   
   }
 }

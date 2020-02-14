@@ -11,11 +11,13 @@ export class UserService {
 
   constructor(private http:HttpClient, private share:SharedService,private route:Router) { }
   //live
+  // CMD : ng build --prod --base-href="http://app.theprintshop.co.za/customerportal/"
   public serverUrl = "http://app.theprintshop.co.za/AngularAPI.php";
  
 
   //clone
   //  public serverUrl = "http://173.255.216.217/yash71/AngularAPI.php";
+  // public serverUrl = "http://173.255.216.217/angularcrm71/AngularAPI.php";
   public decoded = window.atob("encoded");
   loginUser(data):Observable<any>{
     let params={module:"user",view:"check", email : data.email, password : data.password };
@@ -70,5 +72,11 @@ export class UserService {
 
   updateUser(data):Observable<any>{
     return this.http.post(this.serverUrl,data);
+  }
+
+  dashDetails():Observable<any>{
+    
+    let params={module:"dashboard",view:"details", id:this.currentUserDetails().id,sessionId:this.currentUserDetails().sessionid};
+    return this.http.post(this.serverUrl,params);
   }
 }

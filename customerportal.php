@@ -373,6 +373,12 @@ $server->register(
 	array('return'=>'tns:field_datalist_array'),
 	$NAMESPACE);
 
+$server->register(
+	'dashboard_details',
+	array('id'=>'xsd:string', 'sessionid'=>'xsd:string'),
+	array('return'=>'tns:field_datalist_array'),
+	$NAMESPACE);
+
 /**
  * Helper class to provide functionality like caching etc...
  */
@@ -1450,7 +1456,7 @@ function get_ticket_attachments($input_array)
 		$output[$i]['createdtime'] = $adb->query_result($res,$i,'createdtime');
 		
 		$output[$i]['label'] = $label;
-		$output[$i]['filepath'] = str_replace('"', "", $_SERVER['HTTP_SOAPACTION'])."/AngularSoap/tmp/".$filename;
+		$output[$i]['filepath'] = str_replace('"', "", $_SERVER['HTTP_SOAPACTION'])."/".$filepath.$fileid."_".$filename;
 		
 	}
 	$log->debug("Exiting customer portal function get_ticket_attachments");
@@ -1574,8 +1580,13 @@ function add_ticket_attachment($input_array)
 	$focus->parent_id = $ticketid;
 	$focus->save('Documents');
 
+
+	rename('AngularSoap/tmp/'.$filename2 , $upload_filepath.$attachmentid."_".$filename2);
 	$related_doc = 'insert into vtiger_seattachmentsrel values (?,?)';
 	$res = $adb->pquery($related_doc,array($focus->id,$attachmentid));
+
+	// $imgsql = "UPDATE `vtiger_attachments` SET `path` = 'AngularSoap/tmp/' WHERE `vtiger_attachments`.`attachmentsid` = $attachmentid";
+	// $adb->pquery($imgsql,array());
 
 	$tic_doc = 'insert into vtiger_senotesrel values(?,?)';
 	$res = $adb->pquery($tic_doc,array($ticketid,$focus->id));
@@ -1874,6 +1885,109 @@ function get_list_Project($id,$module,$sessionid,$only_mine='true')
 
 }
 
+
+function dashboard_details($id,$sessionid){
+
+//2222222222
+	global $adb,$log,$current_user;
+
+	require_once('include/utils/UserInfoUtil.php'); 
+		$contactquery = "SELECT contactid, accountid FROM vtiger_contactdetails " .
+			" INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_contactdetails.contactid" .
+			" AND vtiger_crmentity.deleted = 0 " .
+			" WHERE (accountid = (SELECT accountid FROM vtiger_contactdetails WHERE contactid = ?)  AND accountid != 0) OR contactid = ?";
+		$contactres = $adb->pquery($contactquery, array($id,$id));
+		$no_of_cont = $adb->num_rows($contactres);
+		for($i=0;$i<$no_of_cont;$i++)
+		{
+			$cont_id = $adb->query_result($contactres,$i,'contactid');
+			$acc_id = $adb->query_result($contactres,$i,'accountid');
+			if(!in_array($cont_id, $entity_ids_list))
+			$entity_ids_list[] = $cont_id;
+			if(!in_array($acc_id, $entity_ids_list) && $acc_id != '0')
+			$entity_ids_list[] = $acc_id;
+		}
+
+
+		 
+	$query = "SELECT vtiger_products.*,vtiger_seproductsrel.crmid as entityid, vtiger_seproductsrel.setype FROM vtiger_products
+		INNER JOIN vtiger_crmentity on vtiger_products.productid = vtiger_crmentity.crmid
+		LEFT JOIN vtiger_seproductsrel on vtiger_seproductsrel.productid = vtiger_products.productid
+		WHERE vtiger_seproductsrel.crmid in (". generateQuestionMarks($entity_ids_list).") and vtiger_crmentity.deleted = 0 ";
+
+			$prodctsres = $adb->pquery($query, array($entity_ids_list));
+			$prodct_cont = $adb->num_rows($prodctsres);
+
+
+
+	$querytkt = "SELECT vtiger_troubletickets.*, vtiger_crmentity.smownerid,vtiger_crmentity.createdtime, vtiger_crmentity.modifiedtime, '' AS setype
+		FROM vtiger_troubletickets
+		INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_troubletickets.ticketid AND vtiger_crmentity.deleted = 0
+		WHERE (vtiger_troubletickets.contact_id IN (". generateQuestionMarks($entity_ids_list) .")";
+			if($acc_id) {
+				$querytkt .= " OR vtiger_troubletickets.parent_id = $acc_id) ";
+			} else {
+				$querytkt .= ')';
+			}
+	$tktres = $adb->pquery($querytkt, array($entity_ids_list));
+			$tkt_cont = $adb->num_rows($tktres);
+
+	$invquery ="select distinct vtiger_invoice.*,vtiger_crmentity.smownerid,
+		case when vtiger_invoice.contactid !=0 then vtiger_invoice.contactid else vtiger_invoice.accountid end as entityid,
+		case when vtiger_invoice.contactid !=0 then 'Contacts' else 'Accounts' end as setype
+		from vtiger_invoice
+		left join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_invoice.invoiceid
+		where vtiger_crmentity.deleted=0 and (accountid in (". generateQuestionMarks($entity_ids_list) .") or contactid in  (". generateQuestionMarks($entity_ids_list) ."))";
+		$invparams = array($entity_ids_list,$entity_ids_list);
+		$invres = $adb->pquery($invquery, $invparams);
+			$inv_cont = $adb->num_rows($invres);
+
+
+	$qotquery = "select distinct vtiger_quotes.*,vtiger_crmentity.smownerid,
+		case when vtiger_quotes.contactid is not null then vtiger_quotes.contactid else vtiger_quotes.accountid end as entityid,
+		case when vtiger_quotes.contactid is not null then 'Contacts' else 'Accounts' end as setype,
+		vtiger_potential.potentialname,vtiger_account.accountid
+		from vtiger_quotes left join vtiger_crmentity on vtiger_crmentity.crmid=vtiger_quotes.quoteid
+		LEFT OUTER JOIN vtiger_account
+		ON vtiger_account.accountid = vtiger_quotes.accountid
+		LEFT OUTER JOIN vtiger_potential
+		ON vtiger_potential.potentialid = vtiger_quotes.potentialid
+		where vtiger_crmentity.deleted=0 and (vtiger_quotes.accountid in  (". generateQuestionMarks($entity_ids_list) .") or contactid in (". generateQuestionMarks($entity_ids_list) ."))";
+		$qotparams = array($entity_ids_list,$entity_ids_list);
+		$qotres = $adb->pquery($qotquery, $qotparams);
+			$qot_cont = $adb->num_rows($qotres);
+
+
+	$proquery = "SELECT vtiger_project.*, vtiger_crmentity.smownerid
+					FROM vtiger_project
+					INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_project.projectid
+					WHERE vtiger_crmentity.deleted = 0 AND vtiger_project.linktoaccountscontacts IN (".generateQuestionMarks($entity_ids_list).")";
+		$proparams = array($entity_ids_list);
+		$prores = $adb->pquery($proquery, $proparams);
+		$pro_cont = $adb->num_rows($prores);
+
+	$docquery ="select vtiger_notes.*, vtiger_crmentity.*, vtiger_senotesrel.crmid as entityid, '' as setype,vtiger_attachmentsfolder.foldername from vtiger_notes " .
+		"inner join vtiger_crmentity on vtiger_crmentity.crmid = vtiger_notes.notesid " .
+		"left join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid " .
+		"LEFT JOIN vtiger_attachmentsfolder ON vtiger_attachmentsfolder.folderid = vtiger_notes.folderid " .
+		"where vtiger_crmentity.deleted = 0 and  vtiger_senotesrel.crmid in (".generateQuestionMarks($entity_ids_list).")";
+		$docparams = array($entity_ids_list);
+	$docres = $adb->pquery($docquery, $docparams);
+	$doc_cont = $adb->num_rows($docres);
+
+
+
+	return	[array('products'=>$prodct_cont,
+		'tickets'=>$tkt_cont,
+		'invoice'=>$inv_cont,
+		'quotes'=>$qot_cont,
+		'projects'=>$pro_cont,
+		'documents'=>$doc_cont,
+	)];
+	 
+
+}
+
 function invoiceList($id,$sessionid){
 	global $adb,$log,$current_user;
 
@@ -2102,9 +2216,10 @@ function get_list_values($id,$module,$sessionid,$only_mine='true')
 	}
 	else if ($module == 'Documents')
 	{
-		 $query ="select vtiger_notes.*, vtiger_crmentity.*, vtiger_senotesrel.crmid as entityid, '' as setype,vtiger_attachmentsfolder.foldername from vtiger_notes " .
+		 $query ="select vtiger_notes.*, vtiger_attachments.*, vtiger_crmentity.*, vtiger_senotesrel.crmid as entityid, '' as setype,vtiger_attachmentsfolder.foldername from vtiger_notes " .
 		"inner join vtiger_crmentity on vtiger_crmentity.crmid = vtiger_notes.notesid " .
-		"left join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid " .
+		"left join vtiger_senotesrel on vtiger_senotesrel.notesid=vtiger_notes.notesid " ."left join vtiger_seattachmentsrel on vtiger_seattachmentsrel.crmid=vtiger_notes.notesid " .
+		"left join vtiger_attachments on vtiger_attachments.attachmentsid=vtiger_seattachmentsrel.attachmentsid " .
 		"LEFT JOIN vtiger_attachmentsfolder ON vtiger_attachmentsfolder.folderid = vtiger_notes.folderid " .
 		"where vtiger_crmentity.deleted = 0 and  vtiger_senotesrel.crmid in (".generateQuestionMarks($entity_ids_list).")";
 		$params = array($entity_ids_list);
@@ -2209,9 +2324,18 @@ function get_list_values($id,$module,$sessionid,$only_mine='true')
 					$fileactive = $adb->query_result($res,$j,'filestatus');
 					$filetype = $adb->query_result($res,$j,'filelocationtype');
 
+					$filepath = $adb->query_result($res,$j,'path'); 
+					$fileid = $adb->query_result($res,$j,'attachmentsid'); 
+
 					if($fileactive == 1){
 						if($filetype == 'I'){
-							$fieldvalue = '<a href="index.php?&downloadfile=true&folderid='.$folderid.'&filename='.$filename.'&module=Documents&action=index&id='.$fieldid.'">'.$fieldvalue.'</a>';
+
+							$path= str_replace('"', "", $_SERVER['HTTP_SOAPACTION'])."/".$filepath.$fileid."_".$filename;
+						 
+							$img="<img class='cursor downLoadImg' src='".$path."'><a href='".$path."' target='_blank' download>".$fieldvalue."</a>";
+							$fieldvalue = $img;
+							// $fieldvalue = '<a href="'.$path.'" download>'.$fieldvalue.$img.'</a>';
+							// $fieldvalue = '<a href="index.php?&downloadfile='.$filepath.'&folderid='.$folderid.'&filename='.$filename.'&module=Documents&action=index&id='.$fieldid.'" download>'.$fieldvalue.$img.'</a>';
 						}
 						elseif($filetype == 'E'){
 							$fieldvalue = '<a target="_blank" href="'.$filename.'" onclick = "updateCount('.$fieldid.');">'.$filename.'</a>';
@@ -2282,13 +2406,14 @@ function get_list_values($id,$module,$sessionid,$only_mine='true')
 			if($module == 'Assets' && $fieldname == 'assetname') {
 					$assetname = $fieldvalue;
 					$assetid = $adb->query_result($res, $j, 'assetsid');
-					$fieldvalue = '<a href="index.php?module=Assets&action=index&id='.$assetid.'">'.$assetname.'</a>';
+					$fieldvalue = '<a class="cursor detailView id_'.$assetid.'"   >'.$assetname.'</a>';
 			}
 			if($fieldname == 'product' && $module == 'Assets'){
 				$crmid= $adb->query_result($res,$j,'product');
 				$fres = $adb->pquery('select vtiger_products.productname from vtiger_products where productid=?',array($crmid));
 				$productname = $adb->query_result($fres,0,'productname');
-				$fieldvalue = '<a href="index.php?module=Products&action=index&id='.$crmid.'">'.$productname.'</a>';
+				$fieldvalue = '<a class="cursor productDetailView id_'.$crmid.'">'.$productname.'</a>';
+				// $fieldvalue = '<a href="index.php?module=Products&action=index&id='.$crmid.'">'.$productname.'</a>';
 			}
 			if($fieldname == 'smownerid'){
 				$fieldvalue = getOwnerName($fieldvalue);
@@ -2508,7 +2633,8 @@ function get_invoice_detail($id,$module,$customerid,$sessionid)
 		{
 			$fieldid = $adb->query_result($res,0,'invoiceid');
 			//$fieldlabel = "(Download PDF)  ".$fieldlabel;
-			$fieldvalue = '<a href="index.php?downloadfile=true&module=Invoice&action=index&id='.$fieldid.'">'.$fieldvalue.'</a>';
+			// $fieldvalue = '<a href="index.php?downloadfile=true&module=Invoice&action=index&id='.$fieldid.'">'.$fieldvalue.'</a>';
+			// $fieldvalue = $fieldvalue;
 		}
 		if( $fieldname == 'salesorderid' || $fieldname == 'contactid' || $fieldname == 'accountid' || $fieldname == 'potentialid')
 		{
@@ -2721,12 +2847,14 @@ function get_details($id,$module,$customerid,$sessionid)
 	}
 	else if($module == 'Documents'){
 		$query =  "SELECT
-			vtiger_notes.*,vtiger_crmentity.*,vtiger_attachmentsfolder.foldername,vtiger_notescf.*
+			vtiger_notes.*,vtiger_attachments.*,vtiger_crmentity.*,vtiger_attachmentsfolder.foldername,vtiger_notescf.*
 			FROM vtiger_notes
 			INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = vtiger_notes.notesid
 			LEFT JOIN vtiger_attachmentsfolder
 				ON vtiger_notes.folderid = vtiger_attachmentsfolder.folderid
 			LEFT JOIN vtiger_notescf ON vtiger_notescf.notesid = vtiger_notes.notesid
+			left join vtiger_seattachmentsrel on vtiger_seattachmentsrel.crmid=vtiger_notes.notesid
+			left join vtiger_attachments on vtiger_attachments.attachmentsid=vtiger_seattachmentsrel.attachmentsid
 			WHERE vtiger_notes.notesid=(". generateQuestionMarks($id) .") AND vtiger_crmentity.deleted=0";
 	}
 	else if($module == 'HelpDesk'){
@@ -2884,10 +3012,18 @@ function get_details($id,$module,$customerid,$sessionid)
 			$folderid = $adb->query_result($res,0,'folderid');
 			$filestatus = $adb->query_result($res,0,'filestatus');
 			$filetype = $adb->query_result($res,0,'filelocationtype');
+
+			$filepath = $adb->query_result($res,0,'path'); 
+			$fileid = $adb->query_result($res,0,'attachmentsid'); 
 			if($fieldname == 'filename'){
 				if($filestatus == 1){
 					if($filetype == 'I'){
-						$fieldvalue = '<a href="index.php?downloadfile=true&folderid='.$folderid.'&filename='.$filename.'&module=Documents&action=index&id='.$fieldid.'" >'.$fieldvalue.'</a>';
+						$path= str_replace('"', "", $_SERVER['HTTP_SOAPACTION'])."/".$filepath.$fileid."_".$filename;
+
+						$img="<img width='220' class='cursor downLoadImg' src='".$path."'><a href='".$path."' target='_blank' download>".$fieldvalue."</a>";
+							$fieldvalue = $img;
+
+						// $fieldvalue = '<a href="index.php?downloadfile=true&folderid='.$folderid.'&filename='.$filename.'&module=Documents&action=index&id='.$fieldid.'" >'.$fieldvalue.'</a>';
 					}
 					elseif($filetype == 'E'){
 						$fieldvalue = '<a target="_blank" href="'.$filename.'" onclick = "updateCount('.$fieldid.');">'.$filename.'</a>';

@@ -81,6 +81,21 @@ export class ModuleListComponent implements OnInit {
        }); 
     });
 
+    document.querySelectorAll('.productDetailView').forEach( function ( item ) {
+      var ditem = item;
+      item.addEventListener('click', function(event) {
+              console.log("item-clicked detail");
+              console.log(ditem.classList[2]);
+              let id = ditem.classList[2];
+              let record = id.replace("id_", "");
+              console.log(record); 
+              thisins.route.navigate(['/all-modules/module-detail',"Products",record]);
+
+       }); 
+    });
+
+    
+
     document.querySelectorAll('.downLoadImg').forEach( function ( item ) {
       var ditem = item;
       item.addEventListener('click', function(event) {

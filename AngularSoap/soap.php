@@ -1,6 +1,6 @@
 <?php
 // header('Content-Type: text/html; charset=utf-8');
-$Server_Path = "http://173.255.216.217/yash71/";
+$Server_Path = "http://app.theprintshop.co.za";
 require_once('nusoap.php');
 global $Server_Path;
 global $client;

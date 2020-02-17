@@ -17,11 +17,8 @@ $proxy_username = ''; //User Name of the Proxy
 $proxy_password = ''; //Password of the Proxy
 //The character set to be used as character encoding for all soap requests
 $default_charset = 'UTF-8';//
-include("AngularSoap/soap.php");
-
-
-
- $travel = new YashPortal($client,$Server_Path);
+include("AngularSoap/soap.php"); 
+$travel = new YashPortal($client,$Server_Path);
 
  
   if($_FILES){
@@ -68,8 +65,9 @@ class YashPortal
 	}
 
 	public function dashboarddetails($request)
-	{	
-		return $_SERVER;
+	{  
+		$params = Array('id'=>$request->id,  "sessionid"=>$request->sessionid);	 
+		return	$result = $this->soapCall('dashboard_details',$params); 
 	}
 
 	//Contacts module Starts here
@@ -199,15 +197,14 @@ class YashPortal
 		$result = $this->soapCall('get_product_list_values',$params);
 
 		$html =  $this->getblock_fieldlistview_product($result,$block);
-		return Array('module'=>$block,'view'=>"list",'html'=>$html);
+		return Array('module'=>$block,'view'=>$result,'html'=>$html);
 	}
 
 	 
 
 	public function Productsdetails($request)
 	{	
-		$module = "Products";
-		 
+		$module = "Products"; 
 		$record = $request->record;  
 		$params = array('id' => $request->id, 'block'=>$module,'contactid'=>$request->customerid,'sessionid'=>$request->sessionid);
 		  $result =  $this->soapCall('get_details',$params);
@@ -290,7 +287,7 @@ class YashPortal
 		$result = $this->soapCall('get_tickets_list',$params);
 		$html = $this->getTickets_fieldlistview($result);
 
-		return Array('module'=>"Tickets",'view'=>"List",'html'=>$html);
+		return Array('module'=>"Tickets",'view'=>$result,'html'=>$html);
 	}
 
 
@@ -611,9 +608,11 @@ class YashPortal
 		$module = "Assets";  
 		 
 		$params = array('id' =>$request->id, 'block'=>$module, 'contactid'=>$request->customerid,'sessionid'=>$request->sessionid);
-		  $result =  $this->soapCall('get_project_components',$params);
+		  $result =  $this->soapCall('get_details',$params);
 		  
-		$html =  $this->getblock_fieldlistview($result,"ProjectMilestone");
+
+		   $noteinfo = $result[0][$module];
+		$html =  $this->getblock_fieldlist($noteinfo); 
 		  
 		return Array('module'=>$module,'view'=> $result,'html'=> $html);
 	}

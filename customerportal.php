@@ -1179,10 +1179,7 @@ function authenticate_user($username,$password,$version,$login = 'true')
 
 /**	function used to change the password for the customer portal
  *	@param array $input_array - array which contains the following values
- => 	int $id - customer id
-	int $sessionid - session id
-	string $username - customer name
-	string $password - new password to change
+ 
 	*	return array $list - returns array with all the customer details
 	*/
 function change_password($input_array)
